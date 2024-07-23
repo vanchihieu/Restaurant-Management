@@ -1,3 +1,6 @@
+// import { TokenPayload } from "@/types/jwt.types";
+
+import jwt from "jsonwebtoken";
 import { toast } from "@/components/ui/use-toast";
 import { UseFormSetError } from "react-hook-form";
 import { type ClassValue, clsx } from "clsx";
@@ -41,7 +44,6 @@ export const handleErrorApi = ({
   }
 };
 
-
 const isBrowser = typeof window !== "undefined";
 
 export const getAccessTokenFromLocalStorage = () =>
@@ -58,3 +60,7 @@ export const removeTokensFromLocalStorage = () => {
   isBrowser && localStorage.removeItem("accessToken");
   isBrowser && localStorage.removeItem("refreshToken");
 };
+
+// export const decodeToken = (token: string) => {
+//   return jwt.decode(token) as TokenPayload;
+// };
