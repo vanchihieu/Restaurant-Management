@@ -17,11 +17,12 @@ import { useLoginMutation } from "@/queries/useAuth";
 import { toast } from "@/components/ui/use-toast";
 import { handleErrorApi } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useAccountMe } from "@/queries/useAccount";
 
 export default function LoginForm() {
   const loginMutation = useLoginMutation();
   const router = useRouter();
-
+  const data = useAccountMe();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {

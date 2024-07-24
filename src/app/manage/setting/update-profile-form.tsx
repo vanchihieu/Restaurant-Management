@@ -12,8 +12,14 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useAccountMe } from "@/queries/useAccount";
 
 export default function UpdateProfileForm() {
+  const [file, setFile] = useState<File | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const { data, refetch } = useAccountMe();
+
   const form = useForm<UpdateMeBodyType>({
     resolver: zodResolver(UpdateMeBody),
     defaultValues: {
@@ -21,6 +27,33 @@ export default function UpdateProfileForm() {
       avatar: "",
     },
   });
+
+  const avatar = form.watch("avatar");
+  const name = form.watch("name");
+
+  useEffect(() => {
+    if (data) {
+      const { name, avatar } = data.payload.data;
+      form.reset({
+        name,
+        avatar: avatar ?? "",
+      });
+    }
+  }, [form, data]);
+
+  // Nếu các bạn dùng Next.js 15 (tức React 19) thì không cần dùng useMemo chỗ này
+  // const previewAvatar = file ? URL.createObjectURL(file) : avatar
+  const previewAvatar = useMemo(() => {
+    if (file) {
+      return URL.createObjectURL(file);
+    }
+    return avatar;
+  }, [avatar, file]);
+
+  const reset = () => {
+    form.reset();
+    setFile(null);
+  };
 
   return (
     <Form {...form}>
@@ -41,9 +74,9 @@ export default function UpdateProfileForm() {
                   <FormItem>
                     <div className="flex gap-2 items-start justify-start">
                       <Avatar className="aspect-square w-[100px] h-[100px] rounded-md object-cover">
-                        <AvatarImage src={"Duoc"} />
+                        <AvatarImage src={previewAvatar} />
                         <AvatarFallback className="rounded-none">
-                          {"Hieu"}
+                          {name}
                         </AvatarFallback>
                       </Avatar>
                       <input
@@ -51,10 +84,21 @@ export default function UpdateProfileForm() {
                         accept="image/*"
                         className="hidden"
                         placeholder="Image"
+                        ref={avatarInputRef}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setFile(file);
+                            field.onChange(
+                              "http://localhost:3000/" + field.name
+                            );
+                          }
+                        }}
                       />
                       <button
                         className="flex aspect-square w-[100px] items-center justify-center rounded-md border border-dashed"
                         type="button"
+                        onClick={() => avatarInputRef.current?.click()}
                       >
                         <Upload className="h-4 w-4 text-muted-foreground" />
                         <span className="sr-only">Upload</span>
