@@ -22,7 +22,6 @@ import { useAccountMe } from "@/queries/useAccount";
 export default function LoginForm() {
   const loginMutation = useLoginMutation();
   const router = useRouter();
-  const data = useAccountMe();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
