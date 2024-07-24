@@ -11,3 +11,9 @@ export const useAccountMe = () => {
     queryFn: accountApiRequest.me,
   });
 };
+
+export const useUpdateMeMutation = () => {
+  return useMutation({
+    mutationFn: accountApiRequest.updateMe,
+  });
+};
