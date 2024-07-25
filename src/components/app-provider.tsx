@@ -1,6 +1,7 @@
 "use client";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createContext, useContext } from "react";
 
 // Default
 // staleTime: 0
@@ -13,14 +14,14 @@ const queryClient = new QueryClient({
     },
   },
 });
-// const AppContext = createContext({
-//   isAuth: false,
-//   role: undefined as RoleType | undefined,
-//   setRole: (role?: RoleType | undefined) => {},
-// });
-// export const useAppContext = () => {
-//   return useContext(AppContext);
-// };
+const AppContext = createContext({
+  isAuth: false,
+  // role: undefined as RoleType | undefined,
+  // setRole: (role?: RoleType | undefined) => {},
+});
+export const useAppContext = () => {
+  return useContext(AppContext);
+};
 export default function AppProvider({
   children,
 }: {
