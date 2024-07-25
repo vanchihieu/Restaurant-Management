@@ -37,7 +37,7 @@ function Logout() {
       router.push("/");
     }
   }, [mutateAsync, router, refreshTokenFromUrl, accessTokenFromUrl]);
-  
+
   return <div>Log out....</div>;
 }
 export default function LogoutPage() {
