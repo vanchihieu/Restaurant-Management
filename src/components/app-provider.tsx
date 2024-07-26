@@ -2,6 +2,7 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
+import RefreshToken from "@/components/refresh-token";
 
 // Default
 // staleTime: 0
@@ -31,7 +32,7 @@ export default function AppProvider({
     // <AppContext.Provider>
     <QueryClientProvider client={queryClient}>
       {children}
-      {/* <RefreshToken /> */}
+      <RefreshToken />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
     // </AppContext.Provider>
