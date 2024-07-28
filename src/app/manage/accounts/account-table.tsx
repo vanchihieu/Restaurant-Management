@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSearchParams } from "next/navigation";
 import AutoPagination from "@/components/auto-pagination";
+import { useGetAccountList } from "@/queries/useAccount";
 
 type AccountItem = AccountListResType["data"][0];
 
@@ -70,7 +71,7 @@ const AccountTableContext = createContext<{
 
 export const columns: ColumnDef<AccountType>[] = [
   {
-    accessorKey: "id",
+    accessorKey: "id", // key to access the value in the data object
     header: "ID",
   },
   {
@@ -113,6 +114,7 @@ export const columns: ColumnDef<AccountType>[] = [
     cell: function Actions({ row }) {
       const { setEmployeeIdEdit, setEmployeeDelete } =
         useContext(AccountTableContext);
+
       const openEditEmployee = () => {
         setEmployeeIdEdit(row.original.id);
       };
@@ -188,7 +190,11 @@ export default function AccountTable() {
   const [employeeDelete, setEmployeeDelete] = useState<AccountItem | null>(
     null
   );
-  const data: any[] = [];
+
+  // Query data
+  const accountListQuery = useGetAccountList()
+  const data = accountListQuery.data?.payload.data ?? []
+  
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
