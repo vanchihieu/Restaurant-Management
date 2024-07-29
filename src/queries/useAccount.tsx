@@ -41,7 +41,7 @@ export const useGetAccount = ({
   return useQuery({
     queryKey: ["accounts", id],
     queryFn: () => accountApiRequest.getEmployee(id),
-    enabled,
+    enabled, // enabled = false thì query sẽ không được gọi ngay lập tức khi component được render
   });
 };
 
@@ -68,7 +68,7 @@ export const useUpdateAccountMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["accounts"],
-        exact: true,
+        exact: true, // exact = true thì chỉ có query có key là ["accounts"] mới bị làm mới, các query có key là ["accounts", id] sẽ không bị làm mới
       });
     },
   });
@@ -85,5 +85,3 @@ export const useDeleteAccountMutation = () => {
     },
   });
 };
-
-
