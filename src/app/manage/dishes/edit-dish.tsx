@@ -37,6 +37,8 @@ import {
 } from "@/schemaValidations/dish.schema";
 import { DishStatus, DishStatusValues } from "@/constants/type";
 import { Textarea } from "@/components/ui/textarea";
+import { useUploadMediaMutation } from "@/queries/useMedia";
+import { useGetDishQuery, useUpdateDishMutation } from "@/queries/useDish";
 
 export default function EditDish({
   id,
@@ -49,13 +51,18 @@ export default function EditDish({
 }) {
   const [file, setFile] = useState<File | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+
+  const uploadMediaMutation = useUploadMediaMutation();
+  const updateDishMutation = useUpdateDishMutation();
+  const { data } = useGetDishQuery({ enabled: Boolean(id), id: id as number });
+
   const form = useForm<UpdateDishBodyType>({
     resolver: zodResolver(UpdateDishBody),
     defaultValues: {
       name: "",
       description: "",
       price: 0,
-      image: "",
+      image: undefined,
       status: DishStatus.Unavailable,
     },
   });
@@ -67,12 +74,65 @@ export default function EditDish({
     }
     return image;
   }, [file, image]);
+
+  useEffect(() => {
+    if (data) {
+      const { name, image, description, price, status } = data.payload.data;
+      form.reset({
+        name,
+        image: image ?? undefined,
+        description,
+        price,
+        status,
+      });
+    }
+  }, [data, form]);
+
+  const onSubmit = async (values: UpdateDishBodyType) => {
+    if (updateDishMutation.isPending) return;
+    try {
+      let body: UpdateDishBodyType & { id: number } = {
+        id: id as number,
+        ...values,
+      };
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const uploadImageResult = await uploadMediaMutation.mutateAsync(
+          formData
+        );
+        const imageUrl = uploadImageResult.payload.data;
+        body = {
+          ...body,
+          image: imageUrl,
+        };
+      }
+      const result = await updateDishMutation.mutateAsync(body);
+      // await revalidateApiRequest("dishes");
+      toast({
+        description: result.payload.message,
+      });
+      reset();
+      onSubmitSuccess && onSubmitSuccess();
+    } catch (error) {
+      handleErrorApi({
+        error,
+        setError: form.setError,
+      });
+    }
+  };
+
+  const reset = () => {
+    setId(undefined);
+    setFile(null);
+  };
+
   return (
     <Dialog
       open={Boolean(id)}
       onOpenChange={(value) => {
         if (!value) {
-          setId(undefined);
+          reset();
         }
       }}
     >
@@ -80,7 +140,7 @@ export default function EditDish({
         <DialogHeader>
           <DialogTitle>Cập nhật món ăn</DialogTitle>
           <DialogDescription>
-            Các trường sau đây là bắ buộc: Tên, ảnh
+            Các trường sau đây là bắt buộc: Tên, ảnh
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -88,6 +148,7 @@ export default function EditDish({
             noValidate
             className="grid auto-rows-max items-start gap-4 md:gap-8"
             id="edit-dish-form"
+            onSubmit={form.handleSubmit(onSubmit, console.log)}
           >
             <div className="grid gap-4 py-4">
               <FormField
@@ -196,6 +257,7 @@ export default function EditDish({
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
